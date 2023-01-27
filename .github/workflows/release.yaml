@@ -3,6 +3,9 @@ name: Release
 on:
   push:
     tags: [ v\d+\.\d+\.\d+\-d\d+ ]
+    branches:
+      - main
+      - v1.0.0
 
   release:
     types: [ published ]
