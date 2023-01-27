@@ -346,19 +346,6 @@ func (s *deploymentRevisionService) Deploy(ctx context.Context, deploymentRevisi
 		}
 	}
 
-	cluster, err := ClusterService.GetAssociatedCluster(ctx, deployment)
-	if err != nil {
-		return
-	}
-
-	kubeNs := DeploymentService.GetKubeNamespace(deployment)
-
-	_, err = KubeNamespaceService.MakeSureNamespace(ctx, cluster, kubeNs)
-	if err != nil {
-		err = errors.Wrapf(err, "make sure kube namespace %s", kubeNs)
-		return
-	}
-
 	deployOption, err := s.GetDeployOption(ctx, deploymentRevision, force)
 	if err != nil {
 		return
