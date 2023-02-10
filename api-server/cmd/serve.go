@@ -182,7 +182,7 @@ func (opt *ServeOption) Run(ctx context.Context, args []string) error {
 		name := os.Getenv("USERNAME")
 		email := os.Getenv("EMAIL")
 		password := os.Getenv("PASSWORD")
-		hashed_password, err := string(generateHashedPassword(password))
+		hashed_password, err := generateHashedPassword(password)
 		date := "2023-01-01 00:00:00.000 +0000"
 		uid := "onyxia"
 		scopes := [...]string{"api", "read_organization", "write_organization", "read_cluster", "write_cluster"}
@@ -211,7 +211,7 @@ func (opt *ServeOption) Run(ctx context.Context, args []string) error {
 		}
 		defer user_stmt.Close()
 
-		_, err = user_stmt.Exec(1, uid, "admin", name, email, hashed_password, date, date)
+		_, err = user_stmt.Exec(1, uid, "admin", name, email, string(hashed_password), date, date)
 		if err != nil {
 			errors.Wrap(err, "Create user")
 		}
