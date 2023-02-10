@@ -178,6 +178,9 @@ func (opt *ServeOption) Run(ctx context.Context, args []string) error {
 	}
 	defer db.Close()
 	err = db.QueryRow("SELECT COUNT(*) FROM user").Scan(&count)
+	if err != nil {
+		return errors.Wrap(err, "create user")
+	}
 	if count != 0 {
 		name := os.Getenv("USERNAME")
 		email := os.Getenv("EMAIL")
