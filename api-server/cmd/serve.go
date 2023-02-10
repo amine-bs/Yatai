@@ -9,6 +9,7 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -24,6 +25,17 @@ import (
 	"github.com/bentoml/yatai/common/command"
 	"github.com/bentoml/yatai/common/sync/errsgroup"
 )
+
+func generateHashedPassword(rawPassword string) ([]byte, error) {
+	if len(rawPassword) == 0 {
+		return []byte(""), nil
+	}
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(rawPassword), 8)
+	if err != nil {
+		return nil, errors.New("generate hashed password")
+	}
+	return hashedPassword, nil
+}
 
 func addCron(ctx context.Context) {
 	c := cron.New()
@@ -170,7 +182,7 @@ func (opt *ServeOption) Run(ctx context.Context, args []string) error {
 		name := os.Getenv("USERNAME")
 		email := os.Getenv("EMAIL")
 		password := os.Getenv("PASSWORD")
-		hashed_password, err := string(services.generateHashedPassword(password))
+		hashed_password, err := string(generateHashedPassword(password))
 		date := "2023-01-01 00:00:00.000 +0000"
 		uid := "onyxia"
 		scopes := [...]string{"api", "read_organization", "write_organization", "read_cluster", "write_cluster"}
