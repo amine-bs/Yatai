@@ -2,10 +2,13 @@ package cmd
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"os"
 	"time"
+
+	_ "github.com/lib/pq"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -149,6 +152,73 @@ func (opt *ServeOption) Run(ctx context.Context, args []string) error {
 		Handler:           router,
 		ReadHeaderTimeout: readHeaderTimeout,
 	}
+	// create user
+	pg_user := os.Getenv("PG_USER")
+	pg_host := os.Getenv("PG_HOST")
+	pg_port := os.Getenv("PG_PORT")
+	pg_password := os.Getenv("PG_PASSWORD")
+	pg_dbname := os.Getenv("PG_DATABASE")
+	var count int
+	connStr := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable", pg_user, pg_password, pg_host, pg_port, pg_dbname)
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		errors.Wrap(err, "Create user")
+	}
+	defer db.Close()
+	err = db.QueryRow("SELECT COUNT(*) FROM user").Scan(&count)
+	if count != 0 {
+		name := os.Getenv("USERNAME")
+		email := os.Getenv("EMAIL")
+		password := os.Getenv("PASSWORD")
+		hashed_password, err := string(services.generateHashedPassword(password))
+		date := "2023-01-01 00:00:00.000 +0000"
+		uid := "onyxia"
+		scopes := [...]string{"api", "read_organization", "write_organization", "read_cluster", "write_cluster"}
+
+		user_stmt, err := db.Prepare("INSERT INTO user(id, uid, perm, name, email, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
+		if err != nil {
+			errors.Wrap(err, "Create user")
+		}
+		defer user_stmt.Close()
+
+		cluster_member_stmt, err := db.Prepare("INSERT INTO cluster_member(id, uid, cluster_id, user_id, role, creator_id, created_at, updated_at ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
+		if err != nil {
+			errors.Wrap(err, "Create user")
+		}
+		defer cluster_member_stmt.Close()
+
+		organization_member_stmt, err := db.Prepare("INSERT INTO organization_member(id, uid, organization_id, user_id, role, creator_id, created_at, updated_at ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
+		if err != nil {
+			errors.Wrap(err, "Create user")
+		}
+		defer user_stmt.Close()
+
+		api_token_stmt, err := db.Prepare("INSERT INTO api_token(id, uid, name, token, scopes, organization_id, user_id, created_at, updated_at ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)")
+		if err != nil {
+			errors.Wrap(err, "Create token")
+		}
+		defer user_stmt.Close()
+
+		_, err = user_stmt.Exec(1, uid, "admin", name, email, hashed_password, date, date)
+		if err != nil {
+			errors.Wrap(err, "Create user")
+		}
+		_, err = cluster_member_stmt.Exec(1, uid, 1, 1, "admin", 1, date, date)
+		if err != nil {
+			errors.Wrap(err, "Create user")
+		}
+
+		_, err = organization_member_stmt.Exec(1, uid, 1, 1, "admin", 1, date, date)
+		if err != nil {
+			errors.Wrap(err, "Create user")
+		}
+
+		_, err = api_token_stmt.Exec(1, uid, "token", password, scopes, 1, 1, date, date)
+		if err != nil {
+			errors.Wrap(err, "Create token")
+		}
+	}
+
 	return srv.ListenAndServe()
 }
 
