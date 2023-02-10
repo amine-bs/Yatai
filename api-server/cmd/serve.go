@@ -181,7 +181,7 @@ func (opt *ServeOption) Run(ctx context.Context, args []string) error {
 	if err != nil {
 		return errors.Wrap(err, "Verifying if user exists")
 	}
-	if count != 0 {
+	if count == 0 {
 		name := os.Getenv("USERNAME")
 		email := os.Getenv("EMAIL")
 		password := os.Getenv("PASSWORD")
