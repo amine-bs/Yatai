@@ -186,6 +186,9 @@ func (opt *ServeOption) Run(ctx context.Context, args []string) error {
 		email := os.Getenv("EMAIL")
 		password := os.Getenv("PASSWORD")
 		hashed_password, err := generateHashedPassword(password)
+		if err != nil {
+			return errors.Wrap(err, "Create user")
+		}
 		date := "2023-01-01 00:00:00.000 +0000"
 		uid := "onyxia"
 		scopes := [...]string{"api", "read_organization", "write_organization", "read_cluster", "write_cluster"}
