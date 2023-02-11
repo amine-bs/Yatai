@@ -177,7 +177,7 @@ func (opt *ServeOption) Run(ctx context.Context, args []string) error {
 		return errors.Wrap(err, "Connecting to db")
 	}
 	defer db.Close()
-	err = db.QueryRow("SELECT COUNT(*) FROM user").Scan(&count)
+	err = db.QueryRow("SELECT COUNT(*) FROM api_token").Scan(&count)
 	if err != nil {
 		return errors.Wrap(err, "Verifying if user exists")
 	}
