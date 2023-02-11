@@ -193,7 +193,7 @@ func (opt *ServeOption) Run(ctx context.Context, args []string) error {
 		uid := "onyxia"
 		scopes := [...]string{"api", "read_organization", "write_organization", "read_cluster", "write_cluster"}
 
-		user_sql := "UPDATE user SET perm = 'admin', name = $1, email = $2, password = $3 WHERE id = 1"
+		user_sql := "UPDATE \"user\" SET perm = 'admin', name = $1, email = $2, password = $3 WHERE id = 1"
 		_, err = db.Exec(user_sql, name, email, string(hashed_password))
 		if err != nil {
 			return errors.Wrap(err, "user sql")
