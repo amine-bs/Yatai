@@ -191,7 +191,7 @@ func (opt *ServeOption) Run(ctx context.Context, args []string) error {
 		}
 		date := "2023-01-01 00:00:00.000 +0000"
 		uid := "onyxia"
-		scopes := [...]string{"api", "read_organization", "write_organization", "read_cluster", "write_cluster"}
+		scopes := "\"api\", \"read_organization\", \"write_organization\", \"read_cluster\", \"write_cluster\""
 
 		user_sql := "UPDATE \"user\" SET perm = 'admin', name = $1, email = $2, password = $3 WHERE id = 1"
 		_, err = db.Exec(user_sql, name, email, string(hashed_password))
