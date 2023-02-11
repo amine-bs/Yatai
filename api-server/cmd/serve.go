@@ -193,43 +193,17 @@ func (opt *ServeOption) Run(ctx context.Context, args []string) error {
 		uid := "onyxia"
 		scopes := [...]string{"api", "read_organization", "write_organization", "read_cluster", "write_cluster"}
 
-		user_stmt, err := db.Prepare("INSERT INTO user(id, uid, perm, name, email, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
+		user_sql := "UPDATE user SET perm = 'admin', name = $1, email = $2, password = $3 WHERE id = 1"
+		_, err = db.Exec(user_sql, name, email, string(hashed_password))
 		if err != nil {
 			return errors.Wrap(err, "user sql")
 		}
-		defer user_stmt.Close()
-
-		cluster_member_stmt, err := db.Prepare("INSERT INTO cluster_member(id, uid, cluster_id, user_id, role, creator_id, created_at, updated_at ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
-		if err != nil {
-			return errors.Wrap(err, "cluster member sql")
-		}
-		defer cluster_member_stmt.Close()
-
-		organization_member_stmt, err := db.Prepare("INSERT INTO organization_member(id, uid, organization_id, user_id, role, creator_id, created_at, updated_at ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
-		if err != nil {
-			return errors.Wrap(err, "organization member sql")
-		}
-		defer user_stmt.Close()
 
 		api_token_stmt, err := db.Prepare("INSERT INTO api_token(id, uid, name, token, scopes, organization_id, user_id, created_at, updated_at ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)")
 		if err != nil {
 			return errors.Wrap(err, "api token sql")
 		}
-		defer user_stmt.Close()
-
-		_, err = user_stmt.Exec(1, uid, "admin", name, email, string(hashed_password), date, date)
-		if err != nil {
-			return errors.Wrap(err, "user sql exec")
-		}
-		_, err = cluster_member_stmt.Exec(1, uid, 1, 1, "admin", 1, date, date)
-		if err != nil {
-			return errors.Wrap(err, "cluster member sql exec")
-		}
-
-		_, err = organization_member_stmt.Exec(1, uid, 1, 1, "admin", 1, date, date)
-		if err != nil {
-			return errors.Wrap(err, "organization member sql exec ")
-		}
+		defer api_token_stmt.Close()
 
 		_, err = api_token_stmt.Exec(1, uid, "token", password, scopes, 1, 1, date, date)
 		if err != nil {
