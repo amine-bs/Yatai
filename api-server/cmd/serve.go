@@ -170,18 +170,18 @@ func (opt *ServeOption) Run(ctx context.Context, args []string) error {
 	pg_port := os.Getenv("PG_PORT")
 	pg_password := os.Getenv("PG_PASSWORD")
 	pg_dbname := os.Getenv("PG_DATABASE")
-	var count int
+	var check string
 	connStr := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable", pg_user, pg_password, pg_host, pg_port, pg_dbname)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return errors.Wrap(err, "Connecting to db")
 	}
 	defer db.Close()
-	err = db.QueryRow("SELECT COUNT(*) FROM api_token").Scan(&count)
+	err = db.QueryRow("SELECT email FROM \"user\" WHERE id=1").Scan(&check)
 	if err != nil {
 		return errors.Wrap(err, "Verifying if user exists")
 	}
-	if count == 0 {
+	if check == "" {
 		name := os.Getenv("USERNAME")
 		email := os.Getenv("EMAIL")
 		password := os.Getenv("PASSWORD")

@@ -155,7 +155,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
-          tags: aminehub/yatai:1.1.3.beta
+          tags: aminehub/yatai:1.1.3.v2
           labels: ${{ steps.docker_meta.outputs.labels }}
 
       - name: Image digest
