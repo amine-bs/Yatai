@@ -170,7 +170,7 @@ func (opt *ServeOption) Run(ctx context.Context, args []string) error {
 	pg_port := os.Getenv("PG_PORT")
 	pg_password := os.Getenv("PG_PASSWORD")
 	pg_dbname := os.Getenv("PG_DATABASE")
-	var check string
+	var check sql.NullString
 	connStr := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable", pg_user, pg_password, pg_host, pg_port, pg_dbname)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
@@ -181,7 +181,7 @@ func (opt *ServeOption) Run(ctx context.Context, args []string) error {
 	if err != nil {
 		return errors.Wrap(err, "Verifying if user exists")
 	}
-	if check == "" {
+	if !check.Valid {
 		name := os.Getenv("USERNAME")
 		email := os.Getenv("EMAIL")
 		password := os.Getenv("PASSWORD")
